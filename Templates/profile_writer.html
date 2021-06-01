@@ -186,7 +186,7 @@
                 {% endif %}
               </p>
               {% if post.image %}
-                <img src="{{ url_for('static', filename=post_img) }}" width="100%" height="auto">
+                <img src="{{ url_for('static', filename='profile_img/'+post.image) }}" width="100%" height="auto">
               {% endif %}
             </div>
           </div>
