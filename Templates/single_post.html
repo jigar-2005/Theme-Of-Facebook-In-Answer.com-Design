@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block body %}
+
+<style>
+  .block img {
+    width: 75px;
+    height: 75px;
+    float: left;
+    margin: 0 1rem 0 0;
+  }
+</style>
+
+<!-- Card for showing post -->
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card my-3 q-box">
+      <div class="card-body">
+        <div class="block">
+          {% if current_user.is_authenticated %}
+          {% if current_user == posts.author %}
+          <div class="update-delete-btn">
+            <a class="btn btn-warning edit" href="/post/{{posts.id}}/update">Edit</a>
+            <a href="/delete/{{posts.id}}" type="button" class="btn btn-danger delete"
+              onclick="return confirm('Are You Sure To Delete?')">Delete</button></a>
+          </div>
+          {% endif %}
+          {% endif %}
+          <img class="rounded-circle account-img" src="{{ url_for('static', filename=profile_img) }}">
+          <h2><a href='/profile/writer/post{{posts.id}}/' style="text-decoration: none;">{{ posts.author.username }}</a>
+          </h2>
+          <h6>Date Post {{posts.date_posted.strftime('%Y-%m-%d') }}</h6>
+        </div><br>
+        <h5 class="card-title"><a href="/post/{{posts.id}}" class="card-title">{{ posts.title|safe }}</a></h5>
+        <p class="card-text">
+          {%if posts.content != posts.content[:120] %}
+          {{ posts.content[:120]|safe }}<b>...</b> &nbsp; <a href="/post/{{posts.id}}">Readmore</a>
+          {%else%}
+          {{ posts.content|safe }}
+          {% endif %}
+        </p>
+        {% if posts.image %}
+        <img src="{{ url_for('static', filename=file_img) }}" width="100%" height="auto">
+        {% endif %}
+        {% if current_user.is_authenticated %}
+        {% if current_user != posts.author %}
+        <form method="POST" action="/post/{{posts.id}}/comment">
+          {{ form.hidden_tag() }}
+          <fieldset class="form-group">
+            <div class="form-group">
+              {{ form.comment.label(class="form-control-label") }}
+              {% if form.comment.errors %}
+              {{ form.comment(class="form-control form-control-lg is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in form.comment.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %}
+              {{ form.comment(class="form-control form-control-lg") }}
+              {% endif %}
+            </div>
+          </fieldset>
+          <div class="form-group"> {{ form.submit(class="btn btn-outline-info post-btn") }}</div>
+        </form>
+        <br><br>
+        {% endif %}
+        {% endif %}
+        <h1 class="text-center"><u>Comment</u></h1>
+        {% for comt in comt %}
+        <ul class="list-group">
+          <li class="list-group-item">{{comt.comment}} <span
+              style="float: right;">{{comt.comment_date.strftime('%d-%m-%Y')}}</span></li>
+        </ul>
+        {%endfor%}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card my-3 q-box related_card">
+      <h3 class="text-center"><u>Related Posts</u></h3>
+      {% for post in post_category %}
+      {% if posts.title != post.title %}
+      <div class="card-body">
+        <h5 class="card-title"><a href="/post/{{post.id}}" class="card-title">{{ post.title|safe }}</a></h5>
+        <p class="card-text">
+          {%if post.content != post.content[:120] %}
+          {{ post.content[:120]|safe }}<b>...</b> &nbsp; <a href="/post/{{post.id}}">Readmore</a>
+          {%else%}
+          {{ post.content|safe }}
+          {% endif %}
+        </p>
+        <h6 class="card-subtitle mb-2">Posted by <span class="writer"><a href='/profile/writer/post{{post.id}}/'>{{
+              post.author.username }}</a></span><span class="time">{{
+            post.date_posted.strftime('%Y-%m-%d') }}</span></h6>
+        <hr>
+      </div>
+      {% endif %}
+      {%endfor%}
+    </div>
+    <div class="card my-3 q-box related_card">
+      <h3 class="text-center"><u>Most Commented Posts</u></h3>
+      {% if dups %}
+      {% for post in dups %}
+      {% if posts.title != post.title %}
+      <div class="card-body">
+        <h5 class="card-title"><a href="/post/{{post.id}}" class="card-title">{{ post.title|safe }}</a></h5>
+        <p class="card-text">
+          {%if post.content != post.content[:120] %}
+          {{ post.content[:120]|safe }}<b>...</b> &nbsp; <a href="/post/{{post.id}}">Readmore</a>
+          {%else%}
+          {{ post.content|safe }}
+          {% endif %}
+        </p>
+        <hr>
+      </div>
+      {%else%}
+      <p>No Related post</p>
+      {% endif %}
+      {%endfor%}
+      {% else %}
+      <p>No related post</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

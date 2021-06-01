@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block body %}
+
+<style>
+  .block img {
+    width: 75px;
+    height: 75px;
+    float: left;
+    margin: 0 1rem 0 0;
+  }
+</style>
+
+<!-- Card for showing post -->
+{% for post in posts.items %}
+<div class="card my-3 q-box">
+  <div class="card-body">
+    <div class="block">
+      {% if current_user.is_authenticated %}
+      {% if current_user == post.author %}
+      <div class="update-delete-btn">
+        <a class="btn btn-warning edit" href="/post/{{post.id}}/update">Edit</a>
+        <a href="/delete/{{post.id}}" type="button" class="btn btn-danger delete"
+          onclick="return confirm('Are You Sure To Delete?')">Delete</button></a>
+      </div>
+      {% endif %}
+      {% endif %}
+      <img class="rounded-circle account-img" src="static/profile_img/{{ post.author.image_file }}">
+      <h2><a href='/profile/writer/post{{post.id}}/' style="text-decoration: none;">{{ post.author.username }}</a></h2>
+      <h6>Date Post {{post.date_posted.strftime('%Y-%m-%d') }}</h6>
+    </div><br>
+    <h5 class="card-title"><a href="/post/{{post.id}}" class="card-title">{{ post.title|safe }}</a></h5>
+    <p class="card-text">
+      {%if post.content != post.content[:120] %}
+      {{ post.content[:120]|safe }}<b>...</b> &nbsp; <a href="/post/{{post.id}}">Readmore</a>
+      {%else%}
+      {{ post.content|safe }}
+      {% endif %}
+    </p>
+    {% if post.image %}
+      <img src="static/profile_img/{{ post.image }}" width="100%" height="auto">
+    {% endif %}
+  </div>
+</div>
+{%endfor%}
+
+<!-- Pagination for page -->
+<ul class="pagination">
+  {% if posts.has_next or posts.has_prev %}
+    {% if posts.has_prev %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('user_post', page_num=posts.prev_num) }}">Previous</a></li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link">Previous</span>
+      {% endif %}
+    </li>
+    {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+    {% if page_num %}
+    {% if posts.page_num == page_num %}
+    <li class="page-item"><a class="page-link mb-4" href="{{ url_for('user_post', page_num=page_num) }}">{{ page_num }}</a>
+    </li>
+    {% else %}
+    <li class="page-item"><a class="page-link mb-4" href="{{ url_for('user_post', page_num=page_num) }}">{{ page_num }}</a>
+    </li>
+    {% endif %}
+    {% else %}
+    ...
+    {% endif %}
+    {% endfor %}
+    {% if posts.has_next %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('user_post', page_num=posts.next_num) }}">Next</a></li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link">Next</span>
+    {% endif %}
+    {% endif %}
+  </li>
+</ul>
+  
+{% endblock %}
